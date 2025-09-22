@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${category.id != null ? 'Chỉnh sửa Danh mục' : 'Thêm Danh mục mới'} + ' - Admin Panel'">Form Danh mục - Admin Panel</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 2px 10px;
+            transition: all 0.3s;
+        }
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+        .main-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h4 class="text-white">
+                            <i class="fas fa-video me-2"></i>
+                            Video Admin
+                        </h4>
+                    </div>
+                    
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/admin/dashboard}">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" th:href="@{/admin/categories}">
+                                <i class="fas fa-tags me-2"></i>
+                                Quản lý Danh mục
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/admin/users}">
+                                <i class="fas fa-users me-2"></i>
+                                Quản lý Người dùng
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/admin/videos}">
+                                <i class="fas fa-video me-2"></i>
+                                Quản lý Video
+                            </a>
+                        </li>
+                        <li class="nav-item mt-3">
+                            <hr class="text-white-50">
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/logout}">
+                                <i class="fas fa-sign-out-alt me-2"></i>
+                                Đăng xuất
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <!-- Top navbar -->
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2" th:text="${category.id != null ? 'Chỉnh sửa Danh mục' : 'Thêm Danh mục mới'}">Form Danh mục</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <a th:href="@{/admin/categories}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Quay lại
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Alert messages -->
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${successMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <span th:text="${errorMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Category Form -->
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-tags me-2"></i>
+                                    <span th:text="${category.id != null ? 'Chỉnh sửa thông tin danh mục' : 'Thông tin danh mục mới'}"></span>
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <form th:action="${category.id != null ? '/admin/categories/edit/' + category.id : '/admin/categories/create'}" 
+                                      th:object="${category}" method="post">
+                                    
+                                    <div class="mb-3">
+                                        <label for="name" class="form-label">
+                                            <i class="fas fa-tag me-1"></i>
+                                            Tên danh mục <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
+                                               id="name" 
+                                               th:field="*{name}" 
+                                               placeholder="Nhập tên danh mục"
+                                               required>
+                                        <div th:if="${#fields.hasErrors('name')}" class="invalid-feedback">
+                                            <span th:errors="*{name}"></span>
+                                        </div>
+                                        <div class="form-text">
+                                            Tên danh mục phải là duy nhất và không được để trống
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="description" class="form-label">
+                                            <i class="fas fa-align-left me-1"></i>
+                                            Mô tả
+                                        </label>
+                                        <textarea class="form-control" 
+                                                  th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"
+                                                  id="description" 
+                                                  th:field="*{description}" 
+                                                  rows="4" 
+                                                  placeholder="Nhập mô tả cho danh mục (tùy chọn)"></textarea>
+                                        <div th:if="${#fields.hasErrors('description')}" class="invalid-feedback">
+                                            <span th:errors="*{description}"></span>
+                                        </div>
+                                        <div class="form-text">
+                                            Mô tả chi tiết về danh mục (tối đa 500 ký tự)
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label class="form-label">
+                                            <i class="fas fa-toggle-on me-1"></i>
+                                            Trạng thái
+                                        </label>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" 
+                                                   type="checkbox" 
+                                                   id="status" 
+                                                   th:field="*{status}"
+                                                   th:checked="${category.status == null || category.status}">
+                                            <label class="form-check-label" for="status">
+                                                <span th:text="${category.status == null || category.status ? 'Hoạt động' : 'Không hoạt động'}">Hoạt động</span>
+                                            </label>
+                                        </div>
+                                        <div class="form-text">
+                                            Chỉ các danh mục hoạt động mới hiển thị trong hệ thống
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between">
+                                        <a th:href="@{/admin/categories}" class="btn btn-secondary">
+                                            <i class="fas fa-times me-2"></i>
+                                            Hủy bỏ
+                                        </a>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i th:class="${category.id != null ? 'fas fa-save' : 'fas fa-plus'} + ' me-2'"></i>
+                                            <span th:text="${category.id != null ? 'Cập nhật' : 'Thêm mới'}"></span>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Additional Info for Edit Mode -->
+                        <div th:if="${category.id != null}" class="card mt-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Thông tin bổ sung
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>ID:</strong> 
+                                        <span th:text="${category.id}"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Trạng thái hiện tại:</strong> 
+                                        <span th:if="${category.status}" class="badge bg-success">Hoạt động</span>
+                                        <span th:unless="${category.status}" class="badge bg-danger">Không hoạt động</span>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-6">
+                                        <strong>Ngày tạo:</strong> 
+                                        <span th:text="${category.createdDate != null ? #temporals.format(category.createdDate, 'dd/MM/yyyy HH:mm:ss') : 'N/A'}"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Ngày cập nhật:</strong> 
+                                        <span th:text="${category.updatedDate != null ? #temporals.format(category.updatedDate, 'dd/MM/yyyy HH:mm:ss') : 'N/A'}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script>
+        // Auto hide alerts after 5 seconds
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+        
+        // Update status label when checkbox changes
+        document.getElementById('status').addEventListener('change', function() {
+            const label = this.nextElementSibling.querySelector('span');
+            label.textContent = this.checked ? 'Hoạt động' : 'Không hoạt động';
+        });
+        
+        // Character counter for description
+        const descriptionField = document.getElementById('description');
+        if (descriptionField) {
+            const maxLength = 500;
+            const counter = document.createElement('div');
+            counter.className = 'form-text text-end';
+            counter.innerHTML = `<span id="char-count">0</span>/${maxLength} ký tự`;
+            descriptionField.parentNode.appendChild(counter);
+            
+            descriptionField.addEventListener('input', function() {
+                const count = this.value.length;
+                document.getElementById('char-count').textContent = count;
+                if (count > maxLength) {
+                    counter.classList.add('text-danger');
+                } else {
+                    counter.classList.remove('text-danger');
+                }
+            });
+            
+            // Initialize counter
+            descriptionField.dispatchEvent(new Event('input'));
+        }
+    </script>
+</body>
+</html>
