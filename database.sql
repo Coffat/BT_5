@@ -1,5 +1,8 @@
 -- Tạo database
-CREATE DATABASE BaiTap5DB;
+IF DB_ID('BaiTap5DB') IS NULL
+BEGIN
+    CREATE DATABASE BaiTap5DB;
+END
 GO
 
 USE BaiTap5DB;
@@ -42,24 +45,49 @@ CREATE TABLE Video (
     category_id BIGINT,
     user_id BIGINT,
     status BIT DEFAULT 1,
-    created_date DATETIME2 DEFAULT GETDATE(),
     updated_date DATETIME2 DEFAULT GETDATE(),
     FOREIGN KEY (category_id) REFERENCES Category(id),
     FOREIGN KEY (user_id) REFERENCES [User](id)
 );
 
--- Thêm dữ liệu mẫu
-INSERT INTO Category (name, description) VALUES 
-('Technology', 'Videos about technology and programming'),
-('Education', 'Educational content and tutorials'),
-('Entertainment', 'Entertainment videos and shows'),
-('Music', 'Music videos and concerts'),
-('Sports', 'Sports highlights and matches');
-
-INSERT INTO [User] (username, password, email, full_name, role) VALUES 
-('admin', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.', 'admin@example.com', 'Administrator', 'ADMIN'),
-('user1', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.', 'user1@example.com', 'John Doe', 'USER'),
-('user2', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.', 'user2@example.com', 'Jane Smith', 'USER');
+    -- Thêm dữ liệu mẫu
+    INSERT INTO Category (name, description) VALUES 
+    ('Technology', 'Videos about technology and programming'),
+    ('Education', 'Educational content and tutorials'),
+    ('Entertainment', 'Entertainment videos and shows'),
+    ('Music', 'Music videos and concerts'),
+    ('Sports', 'Sports highlights and matches');
+    
+    -- Đảm bảo tài khoản admin luôn đúng (UPSERT)
+    MERGE [User] AS target
+    USING (SELECT 'admin' AS username) AS src
+    ON (target.username = src.username)
+    WHEN MATCHED THEN UPDATE SET 
+        password = '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.',
+        email = 'admin@example.com',
+        full_name = 'Administrator',
+        role = 'ADMIN',
+        status = 1
+    WHEN NOT MATCHED THEN
+        INSERT (username, password, email, full_name, role, status)
+        VALUES ('admin', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.', 'admin@example.com', 'Administrator', 'ADMIN', 1);
+    
+    -- Chuẩn hóa password (loại bỏ khoảng trắng vô tình)
+    UPDATE [User]
+    SET password = LTRIM(RTRIM(password))
+    WHERE username = 'admin';
+    
+    -- Seed thêm user mẫu nếu chưa tồn tại
+    IF NOT EXISTS (SELECT 1 FROM [User] WHERE username = 'user1')
+    BEGIN
+        INSERT INTO [User] (username, password, email, full_name, role, status) VALUES 
+        ('user1', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.', 'user1@example.com', 'John Doe', 'USER', 1)
+    END
+    IF NOT EXISTS (SELECT 1 FROM [User] WHERE username = 'user2')
+    BEGIN
+        INSERT INTO [User] (username, password, email, full_name, role, status) VALUES 
+        ('user2', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.', 'user2@example.com', 'Jane Smith', 'USER', 1)
+    END
 
 INSERT INTO Video (title, description, video_url, thumbnail_url, duration, category_id, user_id) VALUES 
 ('Java Programming Tutorial', 'Learn Java programming from basics', 'https://example.com/video1.mp4', 'https://example.com/thumb1.jpg', 1800, 1, 2),

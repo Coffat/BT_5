@@ -1,6 +1,7 @@
 package com.login.baitap5.service;
 
 import com.login.baitap5.entity.Category;
+import com.login.baitap5.entity.Video;
 import com.login.baitap5.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,6 +18,9 @@ public class CategoryService {
     
     @Autowired
     private CategoryRepository categoryRepository;
+    
+    @Autowired
+    private AuditService auditService;
     
     // Lấy tất cả categories
     public List<Category> findAll() {
@@ -69,27 +73,65 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
     
-    // Xóa category theo ID
+    // Xóa category theo ID (cần kiểm tra an toàn trước)
     public void deleteById(Long id) {
+        Optional<Category> categoryOpt = categoryRepository.findById(id);
+        if (categoryOpt.isPresent()) {
+            Category category = categoryOpt.get();
+            
+            // Kiểm tra xem có videos nào đang liên kết không
+            if (category.getVideos() != null && !category.getVideos().isEmpty()) {
+                auditService.logSecurityViolation("UNSAFE_DELETE_ATTEMPT", 
+                    "Attempted to delete Category ID:" + id + " with " + category.getVideos().size() + " videos", 
+                    "SYSTEM", "localhost");
+                throw new RuntimeException("Không thể xóa danh mục này vì vẫn còn " + 
+                    category.getVideos().size() + " video(s) liên quan. Vui lòng xóa hoặc chuyển các video này trước.");
+            }
+            
+            auditService.logDelete("Category", id, "ADMIN");
+        }
+        
         categoryRepository.deleteById(id);
     }
     
-    // Xóa mềm category (chỉ thay đổi status)
+    // Xóa mềm category (chỉ thay đổi status) và đồng bộ với videos
     public void softDelete(Long id) {
         Optional<Category> categoryOpt = categoryRepository.findById(id);
         if (categoryOpt.isPresent()) {
             Category category = categoryOpt.get();
             category.setStatus(false);
+            
+            int affectedVideos = 0;
+            // Đồng bộ vô hiệu hóa tất cả videos thuộc category này
+            if (category.getVideos() != null) {
+                for (com.login.baitap5.entity.Video video : category.getVideos()) {
+                    if (video.getStatus()) { // Chỉ vô hiệu hóa những video đang hoạt động
+                        video.setStatus(false);
+                        affectedVideos++;
+                    }
+                }
+            }
+            
+            auditService.logSoftDelete("Category", id, "ADMIN");
+            if (affectedVideos > 0) {
+                auditService.logCascadeOperation("SOFT_DELETE", "Category", id, "Video", affectedVideos, "ADMIN");
+            }
+            
             categoryRepository.save(category);
         }
     }
     
-    // Khôi phục category
+    // Khôi phục category (lưu ý: videos sẽ không tự động được khôi phục để tránh khôi phục nhầm)
     public void restore(Long id) {
         Optional<Category> categoryOpt = categoryRepository.findById(id);
         if (categoryOpt.isPresent()) {
             Category category = categoryOpt.get();
             category.setStatus(true);
+            
+            // Lưu ý: Không tự động khôi phục videos vì có thể admin đã cố ý vô hiệu hóa từng video riêng lẻ
+            // Admin cần khôi phục videos thủ công nếu muốn
+            
+            auditService.logRestore("Category", id, "ADMIN");
             categoryRepository.save(category);
         }
     }

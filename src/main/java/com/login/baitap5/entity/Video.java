@@ -2,9 +2,12 @@ package com.login.baitap5.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import com.login.baitap5.validation.ValidCategory;
+import com.login.baitap5.validation.ValidUser;
 
 import java.time.LocalDateTime;
 
@@ -53,12 +56,16 @@ public class Video {
     @Column(name = "updated_date")
     private LocalDateTime updatedDate;
     
+    @NotNull(message = "Danh mục không được để trống")
+    @ValidCategory
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
     
+    @NotNull(message = "Người dùng không được để trống")
+    @ValidUser
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
     
     // Constructors

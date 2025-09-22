@@ -37,7 +37,7 @@ public class Category {
     @Column(name = "updated_date")
     private LocalDateTime updatedDate;
     
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "category", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private List<Video> videos;
     
     // Constructors

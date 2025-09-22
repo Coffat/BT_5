@@ -106,6 +106,29 @@ spring.datasource.password=Admin123@
 - ✅ **Authorization**: Role-based (ADMIN/USER)  
 - ✅ **Password**: BCrypt encryption
 - ✅ **Session**: Timeout management
+- ✅ **CSRF Protection**: Enabled với cookie-based tokens
+- ✅ **Input Validation**: Custom validators cho business logic
+- ✅ **Data Integrity**: Cascade operations được kiểm soát
+- ✅ **Audit Logging**: Ghi log tất cả hoạt động quan trọng
+
+## 🛡️ Security Fixes Applied
+
+> **Đã sửa các lỗi bảo mật và ổn định nghiêm trọng** - Xem chi tiết trong [SECURITY_FIXES.md](SECURITY_FIXES.md)
+
+### ✅ **Đã Sửa**
+1. **CSRF Protection** - Ngăn chặn Cross-Site Request Forgery attacks
+2. **Foreign Key Validation** - Validation đầy đủ cho khóa ngoại
+3. **Cascade Control** - Không còn xóa dữ liệu không mong muốn
+4. **Data Consistency** - Đồng bộ status giữa Category và Video
+5. **Error Handling** - Thông báo lỗi thân thiện thay vì HTTP 500
+6. **Audit Trail** - Ghi log tất cả thao tác quan trọng
+
+### 🔒 **Tính Năng Bảo Mật Mới**
+- Custom validation annotations (@ValidCategory, @ValidUser)
+- Global exception handler cho data integrity violations
+- Audit service với logging chi tiết
+- CSRF token tự động trong tất cả forms
+- Safe delete operations với warnings
 
 ## 📝 Các chức năng chính
 

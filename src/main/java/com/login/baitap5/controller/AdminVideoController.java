@@ -106,7 +106,38 @@ public class AdminVideoController {
                         Model model,
                         RedirectAttributes redirectAttributes) {
         
+        // Kiểm tra validation errors
         if (result.hasErrors()) {
+            model.addAttribute("categories", categoryService.findActiveCategories());
+            model.addAttribute("users", userService.findActiveUsers());
+            return "admin/videos/form";
+        }
+        
+        // Kiểm tra khóa ngoại có hợp lệ không
+        if (video.getCategory() == null || video.getCategory().getId() == null) {
+            result.rejectValue("category", "error.video", "Vui lòng chọn danh mục");
+            model.addAttribute("categories", categoryService.findActiveCategories());
+            model.addAttribute("users", userService.findActiveUsers());
+            return "admin/videos/form";
+        }
+        
+        if (video.getUser() == null || video.getUser().getId() == null) {
+            result.rejectValue("user", "error.video", "Vui lòng chọn người dùng");
+            model.addAttribute("categories", categoryService.findActiveCategories());
+            model.addAttribute("users", userService.findActiveUsers());
+            return "admin/videos/form";
+        }
+        
+        // Kiểm tra category và user có tồn tại và đang hoạt động không
+        if (!categoryService.findById(video.getCategory().getId()).isPresent()) {
+            result.rejectValue("category", "error.video", "Danh mục không tồn tại");
+            model.addAttribute("categories", categoryService.findActiveCategories());
+            model.addAttribute("users", userService.findActiveUsers());
+            return "admin/videos/form";
+        }
+        
+        if (!userService.findById(video.getUser().getId()).isPresent()) {
+            result.rejectValue("user", "error.video", "Người dùng không tồn tại");
             model.addAttribute("categories", categoryService.findActiveCategories());
             model.addAttribute("users", userService.findActiveUsers());
             return "admin/videos/form";
@@ -117,7 +148,7 @@ public class AdminVideoController {
             redirectAttributes.addFlashAttribute("successMessage", "Tạo video thành công!");
             return "redirect:/admin/videos";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi xảy ra khi tạo video!");
+            redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi xảy ra khi tạo video: " + e.getMessage());
             return "redirect:/admin/videos/create";
         }
     }
@@ -143,7 +174,38 @@ public class AdminVideoController {
                         Model model,
                         RedirectAttributes redirectAttributes) {
         
+        // Kiểm tra validation errors
         if (result.hasErrors()) {
+            model.addAttribute("categories", categoryService.findActiveCategories());
+            model.addAttribute("users", userService.findActiveUsers());
+            return "admin/videos/form";
+        }
+        
+        // Kiểm tra khóa ngoại có hợp lệ không
+        if (video.getCategory() == null || video.getCategory().getId() == null) {
+            result.rejectValue("category", "error.video", "Vui lòng chọn danh mục");
+            model.addAttribute("categories", categoryService.findActiveCategories());
+            model.addAttribute("users", userService.findActiveUsers());
+            return "admin/videos/form";
+        }
+        
+        if (video.getUser() == null || video.getUser().getId() == null) {
+            result.rejectValue("user", "error.video", "Vui lòng chọn người dùng");
+            model.addAttribute("categories", categoryService.findActiveCategories());
+            model.addAttribute("users", userService.findActiveUsers());
+            return "admin/videos/form";
+        }
+        
+        // Kiểm tra category và user có tồn tại không
+        if (!categoryService.findById(video.getCategory().getId()).isPresent()) {
+            result.rejectValue("category", "error.video", "Danh mục không tồn tại");
+            model.addAttribute("categories", categoryService.findActiveCategories());
+            model.addAttribute("users", userService.findActiveUsers());
+            return "admin/videos/form";
+        }
+        
+        if (!userService.findById(video.getUser().getId()).isPresent()) {
+            result.rejectValue("user", "error.video", "Người dùng không tồn tại");
             model.addAttribute("categories", categoryService.findActiveCategories());
             model.addAttribute("users", userService.findActiveUsers());
             return "admin/videos/form";
@@ -155,7 +217,7 @@ public class AdminVideoController {
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật video thành công!");
             return "redirect:/admin/videos";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi xảy ra khi cập nhật video!");
+            redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi xảy ra khi cập nhật video: " + e.getMessage());
             return "redirect:/admin/videos/edit/" + id;
         }
     }
